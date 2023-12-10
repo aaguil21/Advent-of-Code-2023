@@ -1,8 +1,7 @@
-import pathlib
 import os
 import numpy as np
-from functools import reduce
-import re
+
+
 
 # Read input
 def split_input(filename: str):
@@ -22,7 +21,6 @@ def split_input(filename: str):
             n = []
             i += 1
     data[i] = n 
-    print(data.keys())
     return data
 
 #---Part One---    
@@ -42,9 +40,37 @@ def mapping_seeds(map):
 #---Part Two ---
 def seed_range(map):
     seeds = np.reshape(map['seeds'], (len(map['seeds'])//2, 2))
-    
-    return y
+    destination = [[point[0], point[2]] for point in map[6]]
+    lowest = []
 
+    for d in destination:
+        orig, d = [d], [d]
+        for form in range(len(map)-2,-1, -1):
+            n, o = [], []
+            for k in range(len(orig)):
+                for i in map[form]:
+
+                    diff = i[0] - d[k][0]
+                    if diff < 0 and abs(diff) <= i[2]:
+                        n.append([i[1]-diff,  min(d[k][1], i[2] + diff)])
+                        o.append([orig[k][0], min(d[k][1], i[2] + diff)])
+
+                    if diff >= 0 and diff <= d[k][1]:
+                        n.append([i[1], min(d[k][1] - diff, i[2])])
+                        o.append([orig[k][0]+diff, min(d[k][1] - diff, i[2])])
+
+            orig = o
+            d = n
+
+        for k in range(len(orig)):
+            for seed in seeds:
+                diff = seed[0] - d[k][0]
+                if diff < 0 and abs(diff) <= seed[1]:
+                    lowest.append(orig[k][0])
+                if diff >= 0 and diff <= d[k][1]:
+                    lowest.append(orig[k][0] + diff)
+        
+    return min(lowest)
 
 if __name__ == '__main__':
     os.chdir(os.path.dirname(os.path.abspath(__file__)))
